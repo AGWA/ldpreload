@@ -209,14 +209,20 @@ static void register_client (int sockfd, const Addresses& client_addresses)
 	fake_addresses[sockfd] = client_addresses;
 }
 
-static bool find_listener (int sockfd, sa_family_t* family)
+static bool find_listener (int sockfd, sa_family_t* family, Addresses* addresses)
 {
 	std::lock_guard<std::mutex>	lock(mutex);
 	auto				it(listeners.find(sockfd));
 	if (it == listeners.end()) {
 		return false;
 	}
+	auto				it2(fake_addresses.find(sockfd));
+	if (it2 == fake_addresses.end()) {
+		return false;
+	}
+
 	*family = it->second;
+	*addresses = it2->second;
 	return true;
 }
 
@@ -329,7 +335,8 @@ extern "C" int accept4 (int sockfd, struct sockaddr* addr, socklen_t* addrlen, i
 	const auto		real_accept4 = reinterpret_cast<decltype(accept4)*>(dlsym(RTLD_NEXT, "accept4"));
 
 	sa_family_t		listener_family{};
-	if (!find_listener(sockfd, &listener_family)) {
+	Addresses		listener_addresses{};
+	if (!find_listener(sockfd, &listener_family, &listener_addresses)) {
 		return real_accept4(sockfd, addr, addrlen, flags);
 	}
 
@@ -342,6 +349,8 @@ extern "C" int accept4 (int sockfd, struct sockaddr* addr, socklen_t* addrlen, i
 	if (read_proxy_header(&client_addresses, client_fd, listener_family) == -1) {
 		goto error;
 	}
+	client_addresses.local_addr = listener_addresses.local_addr;
+	client_addresses.local_addrlen = listener_addresses.local_addrlen;
 
 	if (flags & SOCK_NONBLOCK) {
 		const int	fl_flags = fcntl(client_fd, F_GETFL);
