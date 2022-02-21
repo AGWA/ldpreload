@@ -1,7 +1,7 @@
 CXXFLAGS = -Wall -O2 -fPIC -rdynamic -shared
 LDFLAGS =
 
-all: ldpreload-unixbind.so
+all: ldpreload-prebind.so ldpreload-unixbind.so
 
 %.so: %.cpp
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -ldl -o $@ $<
