@@ -1,7 +1,7 @@
 CXXFLAGS = -Wall -O2 -fPIC -rdynamic -shared -std=c++14
 LDFLAGS =
 
-all: tlsdify.so
+all: ldpreload-unixbind.so
 
-tlsdify.so: tlsdify.cpp
+ldpreload-unixbind.so: ldpreload-unixbind.cpp
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -ldl -o $@ $<
