@@ -1,7 +1,12 @@
-CXXFLAGS = -Wall -O2 -fPIC -rdynamic -shared -std=c++14
+CXXFLAGS = -Wall -O2 -fPIC -rdynamic -shared
 LDFLAGS =
 
 all: ldpreload-unixbind.so
 
-ldpreload-unixbind.so: ldpreload-unixbind.cpp
+%.so: %.cpp
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -ldl -o $@ $<
+
+clean:
+	rm -f *.so
+
+.PHONY: all clean
