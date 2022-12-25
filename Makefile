@@ -5,10 +5,10 @@ LDFLAGS =
 all: ldpreload-forcerdonly.so ldpreload-forceurandom.so ldpreload-prebind.so ldpreload-unixbind.so
 
 %.so: %.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -ldl -o $@ $<
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< -ldl
 
 %.so: %.cpp
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -ldl -o $@ $<
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $< -ldl
 
 clean:
 	rm -f *.so
